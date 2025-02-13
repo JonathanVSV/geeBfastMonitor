@@ -52,14 +52,14 @@ https://andreim.users.earthengine.app/view/bfastmonitor
 
 Copy complete code in "monitor" file from repo and paste it in any repo, save it as geeMonitor. Then, change the location of the script so it matches the location.
 
-```{js}
+```js
 // Read bfast script
 var engine = require('users/user/repo:geeMonitor');
 ```
 
 Define the region of interest and parameters for analysis.
 
-```{js}
+```js
 var geometry = ee.Geometry.Polygon(
         [[[-101.79775992358168, 19.463438965605146],
           [-101.79775992358168, 19.352046838562533],
@@ -88,7 +88,7 @@ var polygon = geometry,
 
 Calculate centroid of polygon to try to avoid error in areas with multipass info, i.e., several path/rows in Landsat or several tiles in Sentinel-2. If the "Arguments must have same length along one axis" occurr try moving the roi.
 
-```{js}
+```js
 // Get centroid of area of interest to consult images
 // and avoid the "Arguments must have same length along one axis" error
 var roi = polygon.centroid(10); 
@@ -99,7 +99,7 @@ Map.addLayer(roi, {}, 'roi');
 
 Perform bfast analysis
 
-```{js}
+```js
 
 var result = engine.bfastMonitor(roi,
   historyStart,historyEnd,monitoringStart,monitoringEnd,h,
@@ -108,7 +108,7 @@ var result = engine.bfastMonitor(roi,
 
 Get bfast main results: magnitude of break and time of break.
 
-```{js}
+```js
 var expIm = ee.ImageCollection(ee.Dictionary(result).get('bfastResults'));
 
 var breakMag = ee.Image(expIm.filter(ee.Filter.eq('bfast:result', 'breakMagnitude')).first());
@@ -120,7 +120,7 @@ Map.addLayer(breakTime, {min:2019, max:2021}, 'breakTime');
 
 Export images. Change EPSG code so that it matches the region of interest.
 
-```{js}
+```js
 Export.image.toDrive({
   folder: 'BFAST',
   description: 'breakMag',
@@ -146,14 +146,14 @@ Export.image.toDrive({
 
 Copy complete code in "monitor" file from repo and paste it in any repo, save it as geeMonitor. Then, change the location of the script so it matches the location.
 
-```{js}
+```js
 // Read bfast script
 var engine = require('users/user/repo:geeMonitor');
 ```
 
 Define the region of interest and parameters for analysis. Now let's use the Harmonized Landsat Sentinel-2 (HLS) collection
 
-```{js}
+```js
 var  hls = ee.ImageCollection("NASA/HLS/HLSS30/v002");
 
 var geometry = ee.Geometry.Polygon(
@@ -184,7 +184,7 @@ var polygon = geometry,
 
 Calculate centroid of polygon to try to avoid error in areas with multipass info, i.e., several path/rows in Landsat or several tiles in Sentinel-2. If the "Arguments must have same length along one axis" occurr try moving the roi. Several attempts have been made to fix this issue without success.
 
-```{js}
+```js
 // Get centroid of area of interest to consult images
 // and avoid the "Arguments must have same length along one axis" error
 var roi = polygon.centroid(10); 
@@ -195,7 +195,7 @@ Map.addLayer(roi, {}, 'roi');
 
 Preprocess image collection, i.e., mask clouds, select bands of interest and calculate index of interest (NDMI).
 
-```{js}
+```js
 var col = hls.filterDate(historyStart, monitoringEnd)
              //.filter(ee.Filter.calendarRange(5,10,'month'))
              .filterBounds(roi)
@@ -230,7 +230,7 @@ Map.addLayer(col.first(), {bands: ['R', 'G', 'B'], min:71, max: 1400}, 'col');
 
 Perform bfast analysis using the custom function, passing the arguments as a dictionary.
 
-```{js}
+```js
 
 // Dictionary to run bfast
 var analysisDict = {
@@ -253,7 +253,7 @@ var result = engine.bfastMonitorCustom(analysisDict);
 
 Get bfast main results: magnitude of break and time of break.
 
-```{js}
+```js
 var expIm = ee.ImageCollection(ee.Dictionary(result).get('bfastResults'));
 
 var breakMag = ee.Image(expIm.filter(ee.Filter.eq('bfast:result', 'breakMagnitude')).first());
@@ -273,7 +273,7 @@ Time break image:
 
 Export images. Change EPSG code so that it matches the region of interest.
 
-```{js}
+```js
 Export.image.toDrive({
   folder: 'BFAST',
   description: 'breakMag',
